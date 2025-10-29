@@ -1,5 +1,5 @@
-from service.schemas import TaskRequest
-from service.validators import get_task_validator
+from services.schemas import TaskRequest
+from services.validators import get_task_validator
 from src.queue import EXCHANGE_NAME, ROUTING_KEY_STATUS, send_message
 
 
