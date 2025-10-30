@@ -1,5 +1,4 @@
 import asyncio
-from typing import Any
 
 from src.logger import logger
 from src.queue import (
@@ -10,21 +9,22 @@ from src.queue import (
     RabbitMQConsumer,
     RabbitMQProducer,
 )
+from src.worker import handle_message
 
 rabbit_connection = RabbitMQConnection()
 producer = RabbitMQProducer(rabbit_connection)
 consumer = RabbitMQConsumer(rabbit_connection)
 
 
-async def handle_message(msg: dict[str, Any]):
-    logger.info(f"Message received: {msg}")
-
-
 async def main():
     await rabbit_connection.connect()
 
-    asyncio.create_task(consumer.consume(EXCHANGE_NAME, ROUTING_KEY_TASK, handle_message))
-    asyncio.create_task(consumer.consume(EXCHANGE_NAME, ROUTING_KEY_STATUS, handle_message))
+    asyncio.create_task(
+        consumer.consume(EXCHANGE_NAME, ROUTING_KEY_TASK, lambda msg: handle_message(msg, ROUTING_KEY_TASK))
+    )
+    asyncio.create_task(
+        consumer.consume(EXCHANGE_NAME, ROUTING_KEY_STATUS, lambda msg: handle_message(msg, ROUTING_KEY_STATUS))
+    )
 
     try:
         while True:
