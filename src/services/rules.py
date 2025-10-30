@@ -1,19 +1,18 @@
-from dataclasses import dataclass
-
-
-@dataclass
 class GroupRules:
+    """User can't be a member of both groups"""
+
     CONTRADICTORY = [
-        {"Developer", "DB Admin"},
+        {"Frontend Developer", "Backend Developer"},
         {"ExampleGroup1", "ExampleGroup2"},
         {"ExampleGroup3", "ExampleGroup4"},
     ]
 
 
-@dataclass
 class PermissionRules:
+    """User from from lower group can't have any permissions of higher group"""
+
     CONTRADICTORY = [
-        {"Developer", "DB Admin"},
-        {"ExampleGroup1", "ExampleGroup2"},
-        {"ExampleGroup3", "ExampleGroup4"},
+        {"low": "Tester", "high": "Owner"},
+        {"low": "ExampleGroup5", "high": "ExampleGroup6"},
+        {"low": "ExampleGroup7", "high": "ExampleGroup8"},
     ]
