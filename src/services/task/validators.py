@@ -15,6 +15,7 @@ class TaskValidator:
     def __init__(self, request: dict[str, Any]):
         self.request = request
         self.request_id = request["request_id"]
+        self.is_valid = False
 
     async def validate(self) -> None:
         is_valid = await self._check()
@@ -66,17 +67,9 @@ class GetResourcePermissionValidator(TaskValidator):
         return True
 
 
-# class AddPermissionValidator(TaskValidator):
-#    def _check(self) -> bool:
-#        updated_groups = self.user_groups | {self.requested_item}
-#        if any(set(forbidden) <= updated_groups for forbidden in PermissionRules.CONTRADICTORY):
-#            return "Requested permission contradicts user's permissions"
-#        return None
-
-
 def get_task_validator(request: dict[str, Any]) -> TaskValidator:
     type = request["request_type"]
-    validator = ValidatorMapping.TASK[f"{type}"]
+    validator = ValidatorMapping.TASK[type]
     return validator(request)
 
 
