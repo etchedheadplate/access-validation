@@ -10,10 +10,6 @@ class StatusCreatedResponse(BaseStatus):
     request_status: str = "created"
 
 
-class StatusUnprocessableResponse(BaseStatus):
-    request_status: str = "unprocessable"
-
-
 class StatusValidatedResponse(BaseStatus):
     request_status: str = "validated"
 
