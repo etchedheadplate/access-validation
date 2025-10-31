@@ -38,11 +38,15 @@ class ExcludeFromGroupTask(BaseTask):
 class ViewUserGroupsTask(BaseTask):
     request_type: str = "view_user_groups"
     user_id: str
-    pass
+    user_groups: list[str] = [
+        "",
+    ]
 
 
 class GetResourcePermissionTask(BaseTask):
     request_type: str = "get_resource_permission"
     user_id: str
     resource_id: PositiveInt
-    pass
+    resource_permissions: list[str] = [
+        "",
+    ]
