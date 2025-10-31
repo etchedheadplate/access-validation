@@ -16,16 +16,20 @@ class TaskValidator:
         self.request = request
         self.request_id = request["request_id"]
         self.is_valid = False
+        self.result: str | list[str] = ""
 
     async def validate(self) -> None:
-        is_valid = await self._check()
-        self.is_valid = is_valid
+        self.is_valid = await self._check()
+        if not self.is_valid:
+            self.result = "Request was not validated"
 
     async def _check(self) -> bool:
         return False
 
 
 class JoinGroupValidator(TaskValidator):
+    """Checks if User can be added to Group"""
+
     async def _check(self) -> bool:
         self.task = JoinGroupTask(**self.request)
         updated_groups = set(self.task.user_groups) | {self.task.group_id}
@@ -33,6 +37,8 @@ class JoinGroupValidator(TaskValidator):
 
 
 class AccessPermissionValidator(TaskValidator):
+    """Checks if Permission can be given to User"""
+
     async def _check(self) -> bool:
         self.task = AccessPermissionTask(**self.request)
         "TODO: logic"
@@ -40,6 +46,8 @@ class AccessPermissionValidator(TaskValidator):
 
 
 class RemovePermissionValidator(TaskValidator):
+    """Checks if Permission can be removed from User"""
+
     async def _check(self) -> bool:
         self.task = RemovePermissionTask(**self.request)
         "TODO: logic"
@@ -47,6 +55,8 @@ class RemovePermissionValidator(TaskValidator):
 
 
 class ExcludeFromGroupValidator(TaskValidator):
+    """Checks if User can be excluded from Group"""
+
     async def _check(self) -> bool:
         self.task = ExcludeFromGroupTask(**self.request)
         "TODO: logic"
@@ -54,6 +64,8 @@ class ExcludeFromGroupValidator(TaskValidator):
 
 
 class ViewUserGroupsValidator(TaskValidator):
+    """Checks if User's Groups can be viewed"""
+
     async def _check(self) -> bool:
         self.task = ViewUserGroupsTask(**self.request)
         "TODO: logic"
@@ -61,6 +73,8 @@ class ViewUserGroupsValidator(TaskValidator):
 
 
 class GetResourcePermissionValidator(TaskValidator):
+    """Checks if Resource's Permissions can be viewed"""
+
     async def _check(self) -> bool:
         self.task = GetResourcePermissionTask(**self.request)
         "TODO: logic"

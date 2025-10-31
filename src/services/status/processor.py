@@ -13,7 +13,8 @@ class StatusProcessor:
     def _is_created(self) -> bool:
         return self.request_status == "created"
 
-    async def process(self, valid_task: bool):
-        if not valid_task:
-            return StatusRejectedResponse(request_id=self.request_id)
-        return StatusValidatedResponse(request_id=self.request_id)
+    async def process(self, task_validated: bool, task_result: str | list[str]):
+        self.request_result = task_result
+        if not task_validated:
+            return StatusRejectedResponse(request_id=self.request_id, request_result=self.request_result)
+        return StatusValidatedResponse(request_id=self.request_id, request_result=self.request_result)
