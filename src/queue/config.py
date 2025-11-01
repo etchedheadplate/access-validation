@@ -14,4 +14,6 @@ RABBITMQ_VHOST = os.getenv("RABBITMQ_VHOST", "/")
 
 EXCHANGE_NAME = os.getenv("EXCHANGE_NAME", "access")
 ROUTING_KEY_TASK = os.getenv("ROUTING_KEY_TASK", "request.task")
-ROUTING_KEY_STATUS = os.getenv("ROUTING_KEY_STATUS", "request.status")
+ROUTING_KEY_STATUS_CREATED = os.getenv("ROUTING_KEY_STATUS", "request.status.created")
+ROUTING_KEY_STATUS_VALIDATED = os.getenv("ROUTING_KEY_STATUS", "request.status.validated")
+ROUTING_KEY_STATUS_REJECTED = os.getenv("ROUTING_KEY_STATUS", "request.status.rejected")
