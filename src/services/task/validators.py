@@ -32,8 +32,10 @@ class JoinGroupValidator(TaskValidator):
 
     async def _check(self) -> bool:
         self.task = JoinGroupTask(**self.request)
-        updated_groups = set(self.task.user_groups) | {self.task.group_id}
-        return any(set(forbidden) <= updated_groups for forbidden in GroupRules.CONTRADICTORY)
+        have, want = set(self.task.user_groups), self.task.group_name
+        rules = GroupRules.CONTRADICTORY
+        can = not any(want in rule and have & rule for rule in rules)
+        return can
 
 
 class AccessPermissionValidator(TaskValidator):
@@ -59,25 +61,25 @@ class ExcludeFromGroupValidator(TaskValidator):
 
     async def _check(self) -> bool:
         self.task = ExcludeFromGroupTask(**self.request)
-        "TODO: logic"
-        return True
+        have, excluded_from = set(self.task.user_groups), self.task.group_name
+        can = excluded_from in have
+        return can
 
 
 class ViewUserGroupsValidator(TaskValidator):
-    """Checks if User's Groups can be viewed"""
+    """Checks if User's Groups can be viewed. No rule check needed."""
 
     async def _check(self) -> bool:
         self.task = ViewUserGroupsTask(**self.request)
-        "TODO: logic"
         return True
 
 
 class GetResourcePermissionValidator(TaskValidator):
-    """Checks if Resource's Permissions can be viewed"""
+    """Checks if Resource's Permissions can be viewed. No rule check needed."""
 
     async def _check(self) -> bool:
         self.task = GetResourcePermissionTask(**self.request)
-        "TODO: logic"
+        "No specific logic needed"
         return True
 
 
