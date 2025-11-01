@@ -1,4 +1,7 @@
 import asyncio
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
 
 from src.logger import logger
 from src.queue import (
@@ -16,8 +19,10 @@ producer = RabbitMQProducer(rabbit_connection)
 consumer = RabbitMQConsumer(rabbit_connection)
 
 
-async def main():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     await rabbit_connection.connect()
+    logger.info("Connected to RabbitMQ")
 
     asyncio.create_task(
         consumer.consume(EXCHANGE_NAME, ROUTING_KEY_TASK, lambda msg: handle_message(msg, ROUTING_KEY_TASK))
@@ -26,14 +31,10 @@ async def main():
         consumer.consume(EXCHANGE_NAME, ROUTING_KEY_STATUS, lambda msg: handle_message(msg, ROUTING_KEY_STATUS))
     )
 
-    try:
-        while True:
-            await asyncio.sleep(3600)
-    except (KeyboardInterrupt, asyncio.CancelledError):
-        logger.info("Shutting down consumers...")
-    finally:
-        await rabbit_connection.close()
+    yield
+
+    await rabbit_connection.close()
+    logger.info("Disconnected from RabbitMQ")
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+app = FastAPI(lifespan=lifespan)
