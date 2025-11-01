@@ -23,7 +23,6 @@ async def process_pair(task_message: dict[str, Any], status_message: dict[str, A
     if status.is_appropriate and status.request_id == task.request_id:
         await task.validate()
         message_out = await status.process(task.is_valid, task.result)
-        logger.info(f"OUT: message_out={message_out.model_dump()}")
         await send_message(EXCHANGE_NAME, ROUTING_KEY_STATUS_VALIDATED, message_out.model_dump())
         logger.info(f"OUT: request_id={message_out.request_id}, routing_key={ROUTING_KEY_STATUS_VALIDATED}")
 
