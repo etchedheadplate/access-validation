@@ -4,14 +4,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     SERVICE_NAME: str
 
-    DB_NAME: str
-    DB_HOST: str
-    DB_PORT: int
-    DB_USER: str
-    DB_PASS: str
-
-    JWT_SECRET: str
-
     RABBITMQ_HOST: str
     RABBITMQ_PORT: int
     RABBITMQ_USER: str
