@@ -1,18 +1,13 @@
 import asyncio
 from typing import Any
 
+from src.config import Settings
 from src.logger import logger
-from src.queue import (
-    EXCHANGE_NAME,
-    ROUTING_KEY_STATUS_CREATED,
-    ROUTING_KEY_STATUS_REJECTED,
-    ROUTING_KEY_STATUS_VALIDATED,
-    ROUTING_KEY_TASK,
-    send_message,
-)
+from src.queue import send_message
 from src.services.status.processor import StatusProcessor
 from src.services.task.validators import get_task_validator
 
+settings = Settings()  # type: ignore[call-arg]
 message_buffer: dict[str, dict[str, Any]] = {}
 buffer_lock = asyncio.Lock()
 
@@ -24,8 +19,8 @@ async def process_pair(task_message: dict[str, Any], status_message: dict[str, A
     if status.is_appropriate and status.request_id == task.request_id:
         await task.validate()
         message_out = await status.process(task.is_valid, task.result)
-        routing_key = ROUTING_KEY_STATUS_VALIDATED if task.is_valid else ROUTING_KEY_STATUS_REJECTED
-        await send_message(EXCHANGE_NAME, routing_key, message_out.model_dump())
+        routing_key = settings.ROUTING_KEY_STATUS_VALIDATED if task.is_valid else settings.ROUTING_KEY_STATUS_REJECTED
+        await send_message(settings.EXCHANGE_NAME, routing_key, message_out.model_dump())
         logger.info(f"OUT: request_id={message_out.request_id}, routing_key={routing_key}")
 
 
@@ -38,7 +33,7 @@ def is_task_message(msg: dict[str, Any]) -> bool:
 
 
 async def handle_message(message: dict[str, Any], routing_key: str):
-    if routing_key in (ROUTING_KEY_TASK, ROUTING_KEY_STATUS_CREATED):
+    if routing_key in (settings.ROUTING_KEY_TASK, settings.ROUTING_KEY_STATUS_CREATED):
         logger.info(f" IN: request_id={message['request_id']}, routing_key={routing_key}")
 
     request_id = message.get("request_id")
@@ -49,9 +44,9 @@ async def handle_message(message: dict[str, Any], routing_key: str):
         if request_id not in message_buffer:
             message_buffer[request_id] = {}
 
-        if routing_key == ROUTING_KEY_TASK:
+        if routing_key == settings.ROUTING_KEY_TASK:
             message_buffer[request_id]["task"] = message
-        elif routing_key == ROUTING_KEY_STATUS_CREATED:
+        elif routing_key == settings.ROUTING_KEY_STATUS_CREATED:
             message_buffer[request_id]["status"] = message
 
         entry = message_buffer[request_id]
