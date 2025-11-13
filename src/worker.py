@@ -3,13 +3,15 @@ from typing import Any
 
 from src.config import Settings
 from src.logger import logger
-from src.queue import send_message
+from src.queue import RabbitMQConnection, RabbitMQProducer
 from src.services.status.processor import StatusProcessor
 from src.services.task.validators import get_task_validator
 
 settings = Settings()  # type: ignore[call-arg]
 message_buffer: dict[str, dict[str, Any]] = {}
 buffer_lock = asyncio.Lock()
+rabbit_connection = RabbitMQConnection()
+producer = RabbitMQProducer(rabbit_connection)
 
 
 async def process_pair(task_message: dict[str, Any], status_message: dict[str, Any]):
@@ -20,7 +22,7 @@ async def process_pair(task_message: dict[str, Any], status_message: dict[str, A
         await task.validate()
         message_out = await status.process(task.is_valid, task.result)
         routing_key = settings.ROUTING_KEY_STATUS_VALIDATED if task.is_valid else settings.ROUTING_KEY_STATUS_REJECTED
-        await send_message(settings.EXCHANGE_NAME, routing_key, message_out.model_dump())
+        await producer.send_message(settings.EXCHANGE_NAME, routing_key, message_out.model_dump())
         logger.info(f"OUT: request_id={message_out.request_id}, routing_key={routing_key}")
 
 
